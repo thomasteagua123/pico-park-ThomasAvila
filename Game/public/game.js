@@ -1,7 +1,9 @@
 const CONFIG = {
   TAMANO_BLOQUE: 50,
+
   VELOCIDAD_JUGADOR: 235,
   ACELERACION_JUGADOR: 2500,
+
   SALTO_FUERZA: 500,
   GRAVEDAD: 1050,
 
@@ -13,6 +15,7 @@ const CONFIG = {
   ],
 
   MAX_JUGADORES: 4,
+
   TIEMPO_VICTORIA: 2500,
   TOTAL_NIVELES: 2,
 
@@ -21,8 +24,12 @@ const CONFIG = {
   VELOCIDAD_CAIDA_CAJA: 180,
 
   VELOCIDAD_SIERRA: 170,
+
   TIEMPO_RESPAWN: 800,
   TIEMPO_PLATAFORMA_FRAGIL: 1400,
+
+  VELOCIDAD_CAJA_MOVIL: 190,
+  ACELERACION_CAJA_MOVIL: 900,
 };
 
 const socket = io({
@@ -34,11 +41,6 @@ const socket = io({
 let contadorColores = 0;
 let nivelActual = 1;
 
-
-// ======================================================
-// HELPERS DE MAPA
-// ======================================================
-
 function crearMapaBase() {
   return Array.from(
     { length: 12 },
@@ -46,13 +48,27 @@ function crearMapaBase() {
   );
 }
 
-function piso(mapa, fila, desde, hasta) {
-  for (let x = desde; x <= hasta; x++) {
+function piso(
+  mapa,
+  fila,
+  desde,
+  hasta
+) {
+  for (
+    let x = desde;
+    x <= hasta;
+    x++
+  ) {
     mapa[fila][x] = 1;
   }
 }
 
-function colocar(mapa, fila, columna, tipo) {
+function colocar(
+  mapa,
+  fila,
+  columna,
+  tipo
+) {
   if (
     fila >= 0 &&
     fila < mapa.length &&
@@ -63,241 +79,219 @@ function colocar(mapa, fila, columna, tipo) {
   }
 }
 
-function colocarVarios(mapa, fila, columnas, tipo) {
-  columnas.forEach((columna) => {
-    colocar(mapa, fila, columna, tipo);
-  });
+function colocarVarios(
+  mapa,
+  fila,
+  columnas,
+  tipo
+) {
+  columnas.forEach(
+    (columna) => {
+      colocar(
+        mapa,
+        fila,
+        columna,
+        tipo
+      );
+    }
+  );
 }
-
-
-// ======================================================
-// NIVEL 1
-// ======================================================
 
 const mapaNivel1 = (() => {
   const mapa = crearMapaBase();
 
-  // Fondo
-  [4, 12, 22, 33, 45, 54].forEach((x, i) => {
-    colocar(
-      mapa,
-      i % 2 === 0 ? 2 : 3,
-      x,
-      5
-    );
-  });
-
-  // Agua
-  for (let x = 0; x < 60; x++) {
-    mapa[11][x] = 2;
-  }
-
-
-  // ====================================================
-  // INICIO - IZQUIERDA
-  // ====================================================
-
-  piso(mapa, 10, 0, 6);
-
-  // Primer botón
-  colocar(mapa, 10, 5, 9);
-
-
-  // ====================================================
-  // PRIMER PUENTE
-  // ====================================================
-
-  colocarVarios(
-    mapa,
-    10,
-    [7, 8, 9, 10],
-    10
+  [4, 12, 22, 33, 45, 54].forEach(
+    (x, i) => {
+      colocar(
+        mapa,
+        i % 2 === 0 ? 2 : 3,
+        x,
+        5
+      );
+    }
   );
 
-
-  // ====================================================
-  // SEGUNDO LADO
-  // ====================================================
+  for (
+    let x = 0;
+    x < 60;
+    x++
+  ) {
+    mapa[11][x] = 2;
+  }
 
   piso(
     mapa,
     10,
-    11,
-    17
+    0,
+    6
   );
 
-  // Segundo botón
   colocar(
     mapa,
     10,
-    12,
-    17
+    5,
+    9
   );
 
+  colocarVarios(
+    mapa,
+    10,
+    [
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+    ],
+    10
+  );
 
-  // ====================================================
-  // PINCHOS
-  // ====================================================
+  piso(
+    mapa,
+    10,
+    14,
+    20
+  );
+
+  colocar(
+    mapa,
+    10,
+    15,
+    17
+  );
 
   colocarVarios(
     mapa,
     9,
-    [14, 15],
+    [
+      18,
+      19,
+    ],
     14
   );
 
-
-  // Plataforma superior
   piso(
     mapa,
     8,
-    15,
-    18
-  );
-
-
-  // Plataforma frágil
-  colocarVarios(
-    mapa,
-    7,
-    [19, 20, 21],
-    16
-  );
-
-
-  // Piso
-  piso(
-    mapa,
-    10,
-    19,
+    20,
     23
   );
 
+  colocarVarios(
+    mapa,
+    7,
+    [
+      24,
+      25,
+      26,
+    ],
+    16
+  );
 
-  // ====================================================
-  // SIERRAS
-  // ====================================================
+  piso(
+    mapa,
+    10,
+    21,
+    27
+  );
 
   colocar(
     mapa,
     8,
-    24,
+    27,
     15
   );
 
   piso(
     mapa,
     7,
-    25,
-    28
+    28,
+    31
   );
 
   colocar(
     mapa,
     8,
-    28,
+    30,
     15
   );
 
   piso(
     mapa,
     10,
-    25,
-    30
+    27,
+    33
   );
-
-
-  // ====================================================
-  // PLACAS DE PESO
-  // ====================================================
 
   colocar(
     mapa,
     10,
-    29,
+    31,
     12
   );
 
   colocar(
     mapa,
     10,
-    30,
+    32,
     12
   );
-
-
-  // ====================================================
-  // CAJA
-  // ====================================================
 
   colocar(
     mapa,
     5,
-    33,
+    35,
     13
   );
 
   piso(
     mapa,
     10,
-    31,
-    37
+    34,
+    39
   );
-
-
-  // ====================================================
-  // TRAMPOLÍN
-  // ====================================================
 
   colocar(
     mapa,
     10,
-    38,
+    40,
     11
   );
 
   piso(
     mapa,
     7,
-    39,
-    42
+    41,
+    44
   );
 
   colocar(
     mapa,
     6,
-    41,
+    43,
     14
   );
-
-
-  // ====================================================
-  // ENERGÍA
-  // ====================================================
 
   colocar(
     mapa,
     5,
-    43,
+    46,
     3
   );
 
   piso(
     mapa,
     8,
-    43,
-    46
+    46,
+    49
   );
-
-
-  // ====================================================
-  // ZONA FINAL
-  // ====================================================
 
   piso(
     mapa,
     10,
-    43,
+    45,
     48
   );
 
@@ -336,8 +330,6 @@ const mapaNivel1 = (() => {
     59
   );
 
-
-  // Portal
   colocar(
     mapa,
     10,
@@ -348,34 +340,27 @@ const mapaNivel1 = (() => {
   return mapa;
 })();
 
-
-// ======================================================
-// NIVEL 2
-// ======================================================
-
 const mapaNivel2 = (() => {
   const mapa = crearMapaBase();
 
-  // Fondo
-  [3, 11, 19, 29, 40, 52].forEach((x, i) => {
-    colocar(
-      mapa,
-      i % 2 === 0 ? 2 : 3,
-      x,
-      5
-    );
-  });
+  [3, 11, 19, 29, 40, 52].forEach(
+    (x, i) => {
+      colocar(
+        mapa,
+        i % 2 === 0 ? 2 : 3,
+        x,
+        5
+      );
+    }
+  );
 
-
-  // Agua
-  for (let x = 0; x < 60; x++) {
+  for (
+    let x = 0;
+    x < 60;
+    x++
+  ) {
     mapa[11][x] = 2;
   }
-
-
-  // ====================================================
-  // INICIO
-  // ====================================================
 
   piso(
     mapa,
@@ -387,19 +372,18 @@ const mapaNivel2 = (() => {
   colocar(
     mapa,
     10,
-    4,
+    1,
     9
   );
-
-
-  // ====================================================
-  // PUENTE COOPERATIVO
-  // ====================================================
 
   colocarVarios(
     mapa,
     10,
-    [6, 7, 8],
+    [
+      6,
+      7,
+      8,
+    ],
     10
   );
 
@@ -407,104 +391,67 @@ const mapaNivel2 = (() => {
     mapa,
     10,
     9,
-    13
+    18
   );
 
-  // Segundo botón
+  piso(
+    mapa,
+    8,
+    10,
+    14
+  );
+
   colocar(
     mapa,
-    10,
-    10,
+    8,
+    13,
     17
   );
-
-
-  // ====================================================
-  // PINCHOS
-  // ====================================================
 
   colocarVarios(
     mapa,
     9,
-    [11, 12],
+    [
+      16,
+      17,
+    ],
     14
   );
-
-
-  // Plataforma alta
-  piso(
-    mapa,
-    7,
-    12,
-    15
-  );
-
-
-  // ====================================================
-  // PLATAFORMAS FRÁGILES
-  // ====================================================
 
   colocarVarios(
     mapa,
     7,
-    [16, 17, 18],
+    [
+      19,
+      20,
+      21,
+    ],
     16
   );
 
   colocarVarios(
     mapa,
     8,
-    [19, 20],
+    [
+      22,
+      23,
+    ],
     16
-  );
-
-
-  // ====================================================
-  // SIERRA
-  // ====================================================
-
-  colocar(
-    mapa,
-    7,
-    21,
-    15
   );
 
   piso(
     mapa,
     10,
     18,
-    23
-  );
-
-
-  // ====================================================
-  // PLACAS
-  // ====================================================
-
-  colocar(
-    mapa,
-    10,
-    21,
-    12
+    24
   );
 
   colocar(
     mapa,
-    10,
-    22,
-    12
+    7,
+    24,
+    15
   );
-
-
-  // Caja
-  colocar(
-    mapa,
-    4,
-    26,
-    13
-  );
-
 
   piso(
     mapa,
@@ -512,11 +459,6 @@ const mapaNivel2 = (() => {
     24,
     29
   );
-
-
-  // ====================================================
-  // TRAMPOLÍN
-  // ====================================================
 
   colocar(
     mapa,
@@ -539,11 +481,6 @@ const mapaNivel2 = (() => {
     14
   );
 
-
-  // ====================================================
-  // SEGUNDA ALTURA
-  // ====================================================
-
   piso(
     mapa,
     5,
@@ -558,15 +495,13 @@ const mapaNivel2 = (() => {
     15
   );
 
-
-  // ====================================================
-  // ZONA DIFÍCIL
-  // ====================================================
-
   colocarVarios(
     mapa,
     6,
-    [40, 41],
+    [
+      40,
+      41,
+    ],
     16
   );
 
@@ -587,14 +522,12 @@ const mapaNivel2 = (() => {
   colocarVarios(
     mapa,
     9,
-    [43, 44],
+    [
+      43,
+      44,
+    ],
     14
   );
-
-
-  // ====================================================
-  // ENERGÍA
-  // ====================================================
 
   piso(
     mapa,
@@ -609,11 +542,6 @@ const mapaNivel2 = (() => {
     48,
     3
   );
-
-
-  // ====================================================
-  // FINAL
-  // ====================================================
 
   colocar(
     mapa,
@@ -646,12 +574,13 @@ const mapaNivel2 = (() => {
   colocarVarios(
     mapa,
     8,
-    [54, 55],
+    [
+      54,
+      55,
+    ],
     16
   );
 
-
-  // Portal
   colocar(
     mapa,
     10,
@@ -662,29 +591,15 @@ const mapaNivel2 = (() => {
   return mapa;
 })();
 
-
-// ======================================================
-// MAPA ACTUAL
-// ======================================================
-
 function obtenerMapaActual() {
-  if (nivelActual === 1) {
-    return mapaNivel1;
-  }
-
-  if (nivelActual === 2) {
+  if (
+    nivelActual === 2
+  ) {
     return mapaNivel2;
   }
 
-  nivelActual = 1;
-
   return mapaNivel1;
 }
-
-
-// ======================================================
-// ESCENA
-// ======================================================
 
 class SceneGame extends Phaser.Scene {
   constructor() {
@@ -695,58 +610,60 @@ class SceneGame extends Phaser.Scene {
     this.resetEstado();
   }
 
-
-  // ====================================================
-  // RESET
-  // ====================================================
-
   resetEstado() {
     this.jugadoresSprites = {};
 
-    // Energía
+    this.jugadoresAdentro =
+      new Set();
+
+    this.plataformas = null;
+    this.agua = null;
+    this.botones = null;
+    this.puentes = null;
+
+    this.trampolines = null;
+
+    this.cajas = null;
+
+    this.cajasMovibles = null;
+
+    this.puertasCaja = null;
+
+    this.placasPeso = null;
+
+    this.trampas = null;
+
+    this.plataformasFragiles =
+      null;
+
+    this.grupoJugadores =
+      null;
+
     this.energia = null;
 
     this.energiaOriginalX = 0;
     this.energiaOriginalY = 0;
 
-    this.equipoTieneEnergia = false;
-    this.jugadorConEnergiaId = null;
+    this.equipoTieneEnergia =
+      false;
 
-    this.ultimoTraspasoEnergia = 0;
+    this.jugadorConEnergiaId =
+      null;
+
+    this.ultimoTraspasoEnergia =
+      0;
 
     this.esperandoSeparacionEnergia =
       false;
 
-
-    // Puerta
     this.puerta = null;
-    this.puertaAbierta = false;
 
-    this.jugadoresAdentro =
-      new Set();
+    this.puertaX = 0;
+    this.puertaY = 0;
 
-
-    // Nivel
-    this.nivelSuperado =
+    this.puertaAbierta =
       false;
 
-
-    // Grupos
-    this.plataformas = null;
-    this.agua = null;
-    this.botones = null;
-    this.puentes = null;
-    this.trampolines = null;
-    this.cajas = null;
-    this.placasPeso = null;
-    this.trampas = null;
-    this.plataformasFragiles = null;
-
-    this.grupoJugadores =
-      null;
-
-
-    // Estado cooperativo
     this.pesoActivado =
       false;
 
@@ -756,22 +673,154 @@ class SceneGame extends Phaser.Scene {
     this.puenteAsegurado =
       false;
 
+    this.cajaMovilOriginalX =
+      0;
+
+    this.cajaMovilOriginalY =
+      0;
 
     this.reiniciando =
       false;
 
+    this.nivelSuperado =
+      false;
 
     this.txtVictoria =
       null;
 
-
-    contadorColores = 0;
+    contadorColores =
+      0;
   }
 
+  crearTexturaJugador() {
+    if (
+      this.textures.exists(
+        "player"
+      )
+    ) {
+      return;
+    }
 
-  // ====================================================
-  // TEXTURAS
-  // ====================================================
+    const canvas =
+      this.textures.createCanvas(
+        "player",
+        40,
+        40
+      );
+
+    const ctx =
+      canvas.context;
+
+    ctx.fillStyle =
+      "#DDE7F5";
+
+    ctx.fillRect(
+      8,
+      7,
+      24,
+      23
+    );
+
+    ctx.fillStyle =
+      "#7D8EA8";
+
+    ctx.fillRect(
+      6,
+      11,
+      28,
+      17
+    );
+
+    ctx.fillStyle =
+      "#47D7FF";
+
+    ctx.fillRect(
+      10,
+      13,
+      7,
+      7
+    );
+
+    ctx.fillRect(
+      23,
+      13,
+      7,
+      7
+    );
+
+    ctx.fillStyle =
+      "#111722";
+
+    ctx.fillRect(
+      12,
+      15,
+      3,
+      3
+    );
+
+    ctx.fillRect(
+      25,
+      15,
+      3,
+      3
+    );
+
+    ctx.fillStyle =
+      "#FF5C8A";
+
+    ctx.fillRect(
+      16,
+      23,
+      8,
+      4
+    );
+
+    ctx.fillStyle =
+      "#DDE7F5";
+
+    ctx.fillRect(
+      10,
+      30,
+      8,
+      7
+    );
+
+    ctx.fillRect(
+      22,
+      30,
+      8,
+      7
+    );
+
+    ctx.fillStyle =
+      "#47D7FF";
+
+    ctx.fillRect(
+      7,
+      4,
+      3,
+      7
+    );
+
+    ctx.fillRect(
+      30,
+      4,
+      3,
+      7
+    );
+
+    ctx.fillStyle =
+      "#9CFF57";
+
+    ctx.fillRect(
+      18,
+      1,
+      4,
+      7
+    );
+
+    canvas.refresh();
+  }
 
   crearTextura(
     key,
@@ -779,11 +828,12 @@ class SceneGame extends Phaser.Scene {
     h
   ) {
     if (
-      this.textures.exists(key)
+      this.textures.exists(
+        key
+      )
     ) {
       return;
     }
-
 
     const canvas =
       this.textures.createCanvas(
@@ -792,19 +842,8 @@ class SceneGame extends Phaser.Scene {
         h
       );
 
-
-    if (!canvas) {
-      return;
-    }
-
-
     const ctx =
       canvas.context;
-
-
-    // ==================================================
-    // PISO
-    // ==================================================
 
     if (
       key === "ground"
@@ -819,7 +858,6 @@ class SceneGame extends Phaser.Scene {
         h
       );
 
-
       ctx.fillStyle =
         "#34445C";
 
@@ -829,7 +867,6 @@ class SceneGame extends Phaser.Scene {
         w,
         7
       );
-
 
       ctx.fillStyle =
         "#47D7FF";
@@ -841,7 +878,6 @@ class SceneGame extends Phaser.Scene {
         4
       );
 
-
       ctx.fillStyle =
         "#151C29";
 
@@ -852,12 +888,8 @@ class SceneGame extends Phaser.Scene {
         h - 11
       );
 
-
       ctx.strokeStyle =
         "rgba(255,255,255,0.07)";
-
-      ctx.lineWidth = 1;
-
 
       for (
         let x = 5;
@@ -880,11 +912,6 @@ class SceneGame extends Phaser.Scene {
       }
     }
 
-
-    // ==================================================
-    // AGUA
-    // ==================================================
-
     else if (
       key === "water"
     ) {
@@ -898,7 +925,6 @@ class SceneGame extends Phaser.Scene {
         h
       );
 
-
       ctx.fillStyle =
         "#8B4DFF";
 
@@ -908,7 +934,6 @@ class SceneGame extends Phaser.Scene {
         w,
         8
       );
-
 
       ctx.fillStyle =
         "#D06BFF";
@@ -934,7 +959,6 @@ class SceneGame extends Phaser.Scene {
         3
       );
 
-
       ctx.fillStyle =
         "#59FFB1";
 
@@ -951,11 +975,6 @@ class SceneGame extends Phaser.Scene {
       ctx.fill();
     }
 
-
-    // ==================================================
-    // PORTAL CERRADO
-    // ==================================================
-
     else if (
       key === "door"
     ) {
@@ -969,11 +988,11 @@ class SceneGame extends Phaser.Scene {
         46
       );
 
-
       ctx.strokeStyle =
         "#47D7FF";
 
-      ctx.lineWidth = 4;
+      ctx.lineWidth =
+        4;
 
       ctx.strokeRect(
         7,
@@ -981,7 +1000,6 @@ class SceneGame extends Phaser.Scene {
         36,
         40
       );
-
 
       ctx.fillStyle =
         "#17243A";
@@ -993,7 +1011,6 @@ class SceneGame extends Phaser.Scene {
         26
       );
 
-
       ctx.fillStyle =
         "#FF5C8A";
 
@@ -1004,11 +1021,6 @@ class SceneGame extends Phaser.Scene {
         5
       );
     }
-
-
-    // ==================================================
-    // PORTAL ABIERTO
-    // ==================================================
 
     else if (
       key === "doorOpen"
@@ -1023,11 +1035,11 @@ class SceneGame extends Phaser.Scene {
         46
       );
 
-
       ctx.strokeStyle =
         "#9CFF57";
 
-      ctx.lineWidth = 4;
+      ctx.lineWidth =
+        4;
 
       ctx.strokeRect(
         7,
@@ -1036,36 +1048,8 @@ class SceneGame extends Phaser.Scene {
         40
       );
 
-
-      const brillo =
-        ctx.createLinearGradient(
-          0,
-          12,
-          0,
-          45
-        );
-
-
-      brillo.addColorStop(
-        0,
-        "rgba(71,215,255,0.95)"
-      );
-
-
-      brillo.addColorStop(
-        0.5,
-        "rgba(156,255,87,0.9)"
-      );
-
-
-      brillo.addColorStop(
-        1,
-        "rgba(71,215,255,0.12)"
-      );
-
-
       ctx.fillStyle =
-        brillo;
+        "#47D7FF";
 
       ctx.fillRect(
         14,
@@ -1073,19 +1057,21 @@ class SceneGame extends Phaser.Scene {
         22,
         26
       );
+
+      ctx.fillStyle =
+        "#9CFF57";
+
+      ctx.fillRect(
+        18,
+        10,
+        14,
+        4
+      );
     }
-
-
-    // ==================================================
-    // BOTÓN
-    // ==================================================
 
     else if (
       key === "button"
     ) {
-      // El botón ocupa 20px de altura
-      // y queda apoyado sobre el piso.
-
       ctx.fillStyle =
         "#182231";
 
@@ -1095,7 +1081,6 @@ class SceneGame extends Phaser.Scene {
         w - 4,
         h - 4
       );
-
 
       ctx.fillStyle =
         "#40516A";
@@ -1107,7 +1092,6 @@ class SceneGame extends Phaser.Scene {
         h - 8
       );
 
-
       ctx.fillStyle =
         "#FF5C8A";
 
@@ -1117,7 +1101,6 @@ class SceneGame extends Phaser.Scene {
         w - 26,
         6
       );
-
 
       ctx.fillStyle =
         "#FFD166";
@@ -1136,7 +1119,6 @@ class SceneGame extends Phaser.Scene {
         4
       );
 
-
       ctx.fillStyle =
         "#47D7FF";
 
@@ -1147,11 +1129,6 @@ class SceneGame extends Phaser.Scene {
         2
       );
     }
-
-
-    // ==================================================
-    // PUENTE
-    // ==================================================
 
     else if (
       key === "bridge"
@@ -1166,10 +1143,8 @@ class SceneGame extends Phaser.Scene {
         31
       );
 
-
       ctx.fillStyle =
         "#60738C";
-
 
       for (
         let x = 4;
@@ -1184,7 +1159,6 @@ class SceneGame extends Phaser.Scene {
         );
       }
 
-
       ctx.fillStyle =
         "#47D7FF";
 
@@ -1195,11 +1169,6 @@ class SceneGame extends Phaser.Scene {
         5
       );
     }
-
-
-    // ==================================================
-    // TRAMPOLÍN
-    // ==================================================
 
     else if (
       key === "trampoline"
@@ -1214,7 +1183,6 @@ class SceneGame extends Phaser.Scene {
         20
       );
 
-
       ctx.fillStyle =
         "#FF5C8A";
 
@@ -1225,11 +1193,11 @@ class SceneGame extends Phaser.Scene {
         9
       );
 
-
       ctx.strokeStyle =
         "#FFD166";
 
-      ctx.lineWidth = 2;
+      ctx.lineWidth =
+        2;
 
       ctx.strokeRect(
         7,
@@ -1237,7 +1205,6 @@ class SceneGame extends Phaser.Scene {
         36,
         9
       );
-
 
       ctx.strokeStyle =
         "#47D7FF";
@@ -1277,11 +1244,6 @@ class SceneGame extends Phaser.Scene {
       ctx.stroke();
     }
 
-
-    // ==================================================
-    // PLACA
-    // ==================================================
-
     else if (
       key === "weightplate"
     ) {
@@ -1295,7 +1257,6 @@ class SceneGame extends Phaser.Scene {
         18
       );
 
-
       ctx.fillStyle =
         "#5E738F";
 
@@ -1305,7 +1266,6 @@ class SceneGame extends Phaser.Scene {
         34,
         9
       );
-
 
       ctx.fillStyle =
         "#9CFF57";
@@ -1317,11 +1277,8 @@ class SceneGame extends Phaser.Scene {
         3
       );
 
-
       ctx.strokeStyle =
         "#47D7FF";
-
-      ctx.lineWidth = 2;
 
       ctx.strokeRect(
         5,
@@ -1330,11 +1287,6 @@ class SceneGame extends Phaser.Scene {
         15
       );
     }
-
-
-    // ==================================================
-    // CAJA
-    // ==================================================
 
     else if (
       key === "box"
@@ -1349,11 +1301,11 @@ class SceneGame extends Phaser.Scene {
         42
       );
 
-
       ctx.strokeStyle =
         "#111722";
 
-      ctx.lineWidth = 3;
+      ctx.lineWidth =
+        3;
 
       ctx.strokeRect(
         4,
@@ -1362,11 +1314,11 @@ class SceneGame extends Phaser.Scene {
         42
       );
 
-
       ctx.strokeStyle =
         "#9CB0C7";
 
-      ctx.lineWidth = 2;
+      ctx.lineWidth =
+        2;
 
       ctx.beginPath();
 
@@ -1392,7 +1344,6 @@ class SceneGame extends Phaser.Scene {
 
       ctx.stroke();
 
-
       ctx.fillStyle =
         "#FF5C8A";
 
@@ -1404,17 +1355,82 @@ class SceneGame extends Phaser.Scene {
       );
     }
 
+    else if (
+      key === "gate"
+    ) {
+      ctx.fillStyle =
+        "#1A1F2D";
 
-    // ==================================================
-    // PINCHOS
-    // ==================================================
+      ctx.fillRect(
+        3,
+        2,
+        w - 6,
+        h - 2
+      );
+
+      ctx.fillStyle =
+        "#FF5C8A";
+
+      ctx.fillRect(
+        7,
+        6,
+        w - 14,
+        7
+      );
+
+      ctx.fillRect(
+        7,
+        20,
+        w - 14,
+        7
+      );
+
+      ctx.fillRect(
+        7,
+        34,
+        w - 14,
+        7
+      );
+
+      ctx.strokeStyle =
+        "#FFD166";
+
+      ctx.lineWidth =
+        3;
+
+      ctx.strokeRect(
+        4,
+        3,
+        w - 8,
+        h - 6
+      );
+
+      ctx.fillStyle =
+        "#111722";
+
+      ctx.fillRect(
+        20,
+        13,
+        10,
+        24
+      );
+
+      ctx.fillStyle =
+        "#9CFF57";
+
+      ctx.fillRect(
+        23,
+        17,
+        4,
+        16
+      );
+    }
 
     else if (
       key === "spike"
     ) {
       ctx.fillStyle =
         "#FF5C8A";
-
 
       for (
         let i = 0;
@@ -1423,7 +1439,6 @@ class SceneGame extends Phaser.Scene {
       ) {
         const x =
           i * 12 + 1;
-
 
         ctx.beginPath();
 
@@ -1447,7 +1462,6 @@ class SceneGame extends Phaser.Scene {
         ctx.fill();
       }
 
-
       ctx.fillStyle =
         "#FFD166";
 
@@ -1458,11 +1472,6 @@ class SceneGame extends Phaser.Scene {
         6
       );
     }
-
-
-    // ==================================================
-    // SIERRA
-    // ==================================================
 
     else if (
       key === "saw"
@@ -1482,12 +1491,11 @@ class SceneGame extends Phaser.Scene {
 
       ctx.fill();
 
-
       ctx.strokeStyle =
         "#FF5C8A";
 
-      ctx.lineWidth = 4;
-
+      ctx.lineWidth =
+        4;
 
       for (
         let i = 0;
@@ -1495,54 +1503,42 @@ class SceneGame extends Phaser.Scene {
         i++
       ) {
         const ang =
-          (Math.PI * 2 * i) /
+          (
+            Math.PI * 2 * i
+          ) /
           8;
-
 
         ctx.beginPath();
 
         ctx.moveTo(
           w / 2 +
-            Math.cos(ang) *
+            Math.cos(
+              ang
+            ) *
               12,
           h / 2 +
-            Math.sin(ang) *
+            Math.sin(
+              ang
+            ) *
               12
         );
 
         ctx.lineTo(
           w / 2 +
-            Math.cos(ang) *
+            Math.cos(
+              ang
+            ) *
               23,
           h / 2 +
-            Math.sin(ang) *
+            Math.sin(
+              ang
+            ) *
               23
         );
 
         ctx.stroke();
       }
-
-
-      ctx.fillStyle =
-        "#596B81";
-
-      ctx.beginPath();
-
-      ctx.arc(
-        w / 2,
-        h / 2,
-        6,
-        0,
-        Math.PI * 2
-      );
-
-      ctx.fill();
     }
-
-
-    // ==================================================
-    // FRÁGIL
-    // ==================================================
 
     else if (
       key === "fragile"
@@ -1557,11 +1553,8 @@ class SceneGame extends Phaser.Scene {
         34
       );
 
-
       ctx.strokeStyle =
         "#FFD166";
-
-      ctx.lineWidth = 2;
 
       ctx.strokeRect(
         2,
@@ -1569,7 +1562,6 @@ class SceneGame extends Phaser.Scene {
         w - 4,
         34
       );
-
 
       ctx.strokeStyle =
         "#FF5C8A";
@@ -1609,17 +1601,11 @@ class SceneGame extends Phaser.Scene {
       ctx.stroke();
     }
 
-
-    // ==================================================
-    // DECORACIÓN
-    // ==================================================
-
     else if (
       key === "cloud"
     ) {
       ctx.fillStyle =
         "rgba(71,215,255,0.18)";
-
 
       ctx.beginPath();
 
@@ -1633,7 +1619,6 @@ class SceneGame extends Phaser.Scene {
 
       ctx.fill();
 
-
       ctx.fillStyle =
         "#47D7FF";
 
@@ -1643,30 +1628,7 @@ class SceneGame extends Phaser.Scene {
         8,
         8
       );
-
-
-      ctx.fillStyle =
-        "rgba(156,255,87,0.65)";
-
-      ctx.fillRect(
-        12,
-        14,
-        4,
-        4
-      );
-
-      ctx.fillRect(
-        35,
-        32,
-        4,
-        4
-      );
     }
-
-
-    // ==================================================
-    // ENERGÍA
-    // ==================================================
 
     else if (
       key === "energy"
@@ -1685,7 +1647,6 @@ class SceneGame extends Phaser.Scene {
       );
 
       ctx.fill();
-
 
       ctx.fillStyle =
         "#47D7FF";
@@ -1726,7 +1687,6 @@ class SceneGame extends Phaser.Scene {
 
       ctx.fill();
 
-
       ctx.fillStyle =
         "#9CFF57";
 
@@ -1738,192 +1698,16 @@ class SceneGame extends Phaser.Scene {
       );
     }
 
-
-    else {
-      ctx.fillStyle =
-        "#202939";
-
-      ctx.fillRect(
-        0,
-        0,
-        w,
-        h
-      );
-    }
-
-
     canvas.refresh();
   }
-
-
-  // ====================================================
-  // AVATAR
-  // ====================================================
-
-  crearTexturaJugador() {
-    if (
-      this.textures.exists(
-        "player"
-      )
-    ) {
-      return;
-    }
-
-
-    const canvas =
-      this.textures.createCanvas(
-        "player",
-        40,
-        40
-      );
-
-
-    const ctx =
-      canvas.context;
-
-
-    // Cabeza
-    ctx.fillStyle =
-      "#DDE7F5";
-
-    ctx.fillRect(
-      8,
-      7,
-      24,
-      23
-    );
-
-
-    // Casco
-    ctx.fillStyle =
-      "#7D8EA8";
-
-    ctx.fillRect(
-      6,
-      11,
-      28,
-      17
-    );
-
-
-    // Ojos
-    ctx.fillStyle =
-      "#47D7FF";
-
-    ctx.fillRect(
-      10,
-      13,
-      7,
-      7
-    );
-
-    ctx.fillRect(
-      23,
-      13,
-      7,
-      7
-    );
-
-
-    // Pupilas
-    ctx.fillStyle =
-      "#111722";
-
-    ctx.fillRect(
-      12,
-      15,
-      3,
-      3
-    );
-
-    ctx.fillRect(
-      25,
-      15,
-      3,
-      3
-    );
-
-
-    // Boca
-    ctx.fillStyle =
-      "#FF5C8A";
-
-    ctx.fillRect(
-      16,
-      23,
-      8,
-      4
-    );
-
-
-    // Piernas
-    ctx.fillStyle =
-      "#DDE7F5";
-
-    ctx.fillRect(
-      10,
-      30,
-      8,
-      7
-    );
-
-    ctx.fillRect(
-      22,
-      30,
-      8,
-      7
-    );
-
-
-    // Antenas
-    ctx.fillStyle =
-      "#47D7FF";
-
-    ctx.fillRect(
-      7,
-      4,
-      3,
-      7
-    );
-
-    ctx.fillRect(
-      30,
-      4,
-      3,
-      7
-    );
-
-
-    // Luz superior
-    ctx.fillStyle =
-      "#9CFF57";
-
-    ctx.fillRect(
-      18,
-      1,
-      4,
-      7
-    );
-
-
-    canvas.refresh();
-  }
-
-
-  // ====================================================
-  // CREATE
-  // ====================================================
 
   create() {
     this.resetEstado();
-
 
     this.cameras.main.setBackgroundColor(
       "#0B1020"
     );
 
-
-    // Texturas
     this.crearTextura(
       "ground",
       50,
@@ -1979,6 +1763,12 @@ class SceneGame extends Phaser.Scene {
     );
 
     this.crearTextura(
+      "gate",
+      50,
+      50
+    );
+
+    this.crearTextura(
       "spike",
       50,
       50
@@ -2008,13 +1798,7 @@ class SceneGame extends Phaser.Scene {
       30
     );
 
-
     this.crearTexturaJugador();
-
-
-    // ==================================================
-    // GRUPOS
-    // ==================================================
 
     this.plataformas =
       this.physics.add.staticGroup();
@@ -2034,13 +1818,28 @@ class SceneGame extends Phaser.Scene {
     this.cajas =
       this.physics.add.staticGroup();
 
+    this.cajasMovibles =
+      this.physics.add.group({
+        allowGravity:
+          true,
+
+        immovable:
+          false,
+      });
+
+    this.puertasCaja =
+      this.physics.add.staticGroup();
+
     this.placasPeso =
       this.physics.add.staticGroup();
 
     this.trampas =
       this.physics.add.group({
-        allowGravity: false,
-        immovable: true,
+        allowGravity:
+          false,
+
+        immovable:
+          true,
       });
 
     this.plataformasFragiles =
@@ -2049,92 +1848,112 @@ class SceneGame extends Phaser.Scene {
     this.grupoJugadores =
       this.physics.add.group();
 
-
-    // ==================================================
-    // DIMENSIONES
-    // ==================================================
-
-    const mapaActual =
+    const mapa =
       obtenerMapaActual();
 
-    const tamanoBloque =
+    const ancho =
+      mapa[0].length *
       CONFIG.TAMANO_BLOQUE;
 
-    const mapaAncho =
-      mapaActual[0].length *
-      tamanoBloque;
-
-    const mapaAlto =
-      mapaActual.length *
-      tamanoBloque;
-
+    const alto =
+      mapa.length *
+      CONFIG.TAMANO_BLOQUE;
 
     this.physics.world.setBounds(
       0,
       0,
-      mapaAncho,
-      mapaAlto
+      ancho,
+      alto
     );
-
 
     this.cameras.main.setBounds(
       0,
       0,
-      mapaAncho,
-      mapaAlto
+      ancho,
+      alto
     );
-
-
-    // ==================================================
-    // HUD
-    // ==================================================
 
     this.add
       .text(
-        20,
+        780,
         20,
         `NIVEL ${nivelActual}`,
         {
-          fontSize: "20px",
-          color: "#47D7FF",
-          fontStyle: "bold",
+          fontSize:
+            "20px",
+
+          color:
+            "#47D7FF",
+
+          fontStyle:
+            "bold",
+
           backgroundColor:
             "#111B2E",
 
           padding: {
-            left: 12,
-            right: 12,
-            top: 7,
-            bottom: 7,
+            left:
+              12,
+
+            right:
+              12,
+
+            top:
+              7,
+
+            bottom:
+              7,
           },
         }
       )
+      .setOrigin(1, 0)
       .setScrollFactor(0)
       .setDepth(100);
 
+    let textoAyuda =
+      "PISA EL BOTÓN, CRUZA EL PUENTE Y USA EL TRAMPOLÍN";
+
+    if (
+      nivelActual ===
+      2
+    ) {
+      textoAyuda =
+        "PISA EL BOTÓN PARA HABILITAR EL PUENTE Y AVANZAR";
+    }
 
     this.add
       .text(
-        20,
+        780,
         68,
-        "CONSIGUE LA ENERGÍA Y LLEGA AL PORTAL",
+        textoAyuda,
         {
-          fontSize: "14px",
-          color: "#C9D7EA",
+          fontSize:
+            "14px",
+
+          color:
+            "#C9D7EA",
+
           backgroundColor:
             "#111B2E",
 
           padding: {
-            left: 10,
-            right: 10,
-            top: 5,
-            bottom: 5,
+            left:
+              10,
+
+            right:
+              10,
+
+            top:
+              5,
+
+            bottom:
+              5,
           },
         }
       )
+      .setOrigin(1, 0)
       .setScrollFactor(0)
       .setDepth(100);
-
 
     this.txtVictoria =
       this.add
@@ -2143,22 +1962,39 @@ class SceneGame extends Phaser.Scene {
           300,
           "",
           {
-            fontSize: "42px",
-            color: "#FFFFFF",
-            fontStyle: "bold",
-            align: "center",
+            fontSize:
+              "42px",
 
-            stroke: "#101722",
-            strokeThickness: 8,
+            color:
+              "#FFFFFF",
+
+            fontStyle:
+              "bold",
+
+            align:
+              "center",
+
+            stroke:
+              "#101722",
+
+            strokeThickness:
+              8,
 
             backgroundColor:
               "#17334A",
 
             padding: {
-              left: 26,
-              right: 26,
-              top: 18,
-              bottom: 18,
+              left:
+                26,
+
+              right:
+                26,
+
+              top:
+                18,
+
+              bottom:
+                18,
             },
           }
         )
@@ -2167,51 +2003,40 @@ class SceneGame extends Phaser.Scene {
         .setScrollFactor(0)
         .setDepth(100);
 
-
-    // ==================================================
-    // CONSTRUIR MAPA
-    // ==================================================
-
     for (
       let y = 0;
-      y < mapaActual.length;
+      y < mapa.length;
       y++
     ) {
       for (
         let x = 0;
-        x < mapaActual[y].length;
+        x < mapa[y].length;
         x++
       ) {
         const tipo =
-          mapaActual[y][x];
-
+          mapa[y][x];
 
         const posX =
-          x * tamanoBloque +
-          tamanoBloque / 2;
-
+          x *
+            CONFIG.TAMANO_BLOQUE +
+          CONFIG.TAMANO_BLOQUE /
+            2;
 
         const posY =
-          y * tamanoBloque +
-          tamanoBloque / 2;
+          y *
+            CONFIG.TAMANO_BLOQUE +
+          CONFIG.TAMANO_BLOQUE /
+            2;
 
-
-        // ==========================================
-        // PISO
-        // ==========================================
-
-        if (tipo === 1) {
+        if (
+          tipo === 1
+        ) {
           this.plataformas.create(
             posX,
             posY,
             "ground"
           );
         }
-
-
-        // ==========================================
-        // AGUA
-        // ==========================================
 
         else if (
           tipo === 2
@@ -2223,23 +2048,16 @@ class SceneGame extends Phaser.Scene {
               "water"
             );
 
-
           agua.body.setSize(
             50,
             12
           );
-
 
           agua.body.setOffset(
             0,
             38
           );
         }
-
-
-        // ==========================================
-        // ENERGÍA
-        // ==========================================
 
         else if (
           tipo === 3
@@ -2250,7 +2068,6 @@ class SceneGame extends Phaser.Scene {
           this.energiaOriginalY =
             posY;
 
-
           this.energia =
             this.physics.add
               .sprite(
@@ -2258,41 +2075,34 @@ class SceneGame extends Phaser.Scene {
                 posY,
                 "energy"
               )
-              .setScale(0.8);
-
+              .setScale(
+                0.8
+              );
 
           this.energia.body.allowGravity =
             false;
         }
 
-
-        // ==========================================
-        // PORTAL
-        // ==========================================
-
         else if (
           tipo === 4
         ) {
+          this.puertaX =
+            posX;
+
+          this.puertaY =
+            posY - 15;
+
           this.puerta =
-            this.physics.add.staticSprite(
-              posX,
-              posY - 15,
-              "door"
-            );
-
-
-          this.puerta.setScale(
-            0.9
-          );
-
-
-          this.puerta.refreshBody();
+            this.add
+              .image(
+                this.puertaX,
+                this.puertaY,
+                "door"
+              )
+              .setScale(
+                0.9
+              );
         }
-
-
-        // ==========================================
-        // DECORACIÓN
-        // ==========================================
 
         else if (
           tipo === 5
@@ -2303,34 +2113,24 @@ class SceneGame extends Phaser.Scene {
               posY,
               "cloud"
             )
-            .setDepth(-10);
+            .setDepth(
+              -10
+            );
         }
-
-
-        // ==========================================
-        // BOTÓN
-        // ==========================================
 
         else if (
           tipo === 9 ||
           tipo === 17
         ) {
-          // Creamos piso debajo.
-          // Esto evita que el jugador caiga
-          // al pisar el botón.
-
-          this.plataformas.create(
-            posX,
-            posY,
-            "ground"
-          );
-
-
-          // La textura mide 20px de alto.
-          // El centro queda 35px arriba del centro
-          // del bloque de piso, por lo que la parte
-          // inferior del botón coincide con la parte
-          // superior del piso.
+          if (
+            y === 10
+          ) {
+            this.plataformas.create(
+              posX,
+              posY,
+              "ground"
+            );
+          }
 
           const boton =
             this.botones.create(
@@ -2339,18 +2139,15 @@ class SceneGame extends Phaser.Scene {
               "button"
             );
 
-
           boton.body.setSize(
-            40,
-            8
+            42,
+            10
           );
-
 
           boton.body.setOffset(
-            5,
-            6
+            4,
+            5
           );
-
 
           boton.setData(
             "tipoBoton",
@@ -2359,11 +2156,6 @@ class SceneGame extends Phaser.Scene {
               : 2
           );
         }
-
-
-        // ==========================================
-        // PUENTE
-        // ==========================================
 
         else if (
           tipo === 10
@@ -2375,32 +2167,23 @@ class SceneGame extends Phaser.Scene {
               "bridge"
             );
 
-
           puente.body.setSize(
             50,
-            20
+            10
           );
-
 
           puente.body.setOffset(
             0,
-            0
+            15
           );
-
 
           puente.body.enable =
             false;
-
 
           puente.setAlpha(
             0.3
           );
         }
-
-
-        // ==========================================
-        // TRAMPOLÍN
-        // ==========================================
 
         else if (
           tipo === 11
@@ -2412,65 +2195,21 @@ class SceneGame extends Phaser.Scene {
               "trampoline"
             );
 
-
           trampolin.body.setSize(
             50,
-            25
+            10
           );
-
 
           trampolin.body.setOffset(
             0,
-            25
+            15
           );
 
-
-          trampolin.body.enable =
-            true;
-
-
-          const texto =
-            this.add
-              .text(
-                posX,
-                posY - 30,
-                "",
-                {
-                  fontSize:
-                    "28px",
-
-                  color:
-                    "#FFFFFF",
-
-                  fontStyle:
-                    "bold",
-
-                  stroke:
-                    "#1F2937",
-
-                  strokeThickness:
-                    5,
-                }
-              )
-              .setOrigin(0.5);
-
-
           trampolin.setData(
-            "txt",
-            texto
-          );
-
-
-          trampolin.setData(
-            "estado",
-            "idle"
+            "cooldownHasta",
+            0
           );
         }
-
-
-        // ==========================================
-        // PLACA
-        // ==========================================
 
         else if (
           tipo === 12
@@ -2482,12 +2221,10 @@ class SceneGame extends Phaser.Scene {
               "weightplate"
             );
 
-
           placa.body.setSize(
             40,
             15
           );
-
 
           placa.body.setOffset(
             5,
@@ -2495,64 +2232,78 @@ class SceneGame extends Phaser.Scene {
           );
         }
 
-
-        // ==========================================
-        // CAJA
-        // ==========================================
-
         else if (
           tipo === 13
         ) {
-          const caja =
-            this.cajas.create(
-              posX,
-              posY,
-              "box"
+          if (
+            nivelActual === 1
+          ) {
+            const caja =
+              this.cajas.create(
+                posX,
+                posY,
+                "box"
+              );
+
+            caja.body.setSize(
+              50,
+              50
             );
 
+            caja.body.setOffset(
+              0,
+              0
+            );
 
-          caja.body.setSize(
-            50,
+            caja.setData(
+              "xInicial",
+              posX
+            );
+
+            caja.setData(
+              "yInicial",
+              posY
+            );
+
+            caja.setData(
+              "yObjetivo",
+              posY +
+                CONFIG.FILAS_CAIDA_CAJA *
+                  CONFIG.TAMANO_BLOQUE
+            );
+
+            caja.setData(
+              "aterrizada",
+              false
+            );
+          }
+        }
+
+        else if (
+          tipo === 20
+        ) {
+          const puertaCaja =
+            this.puertasCaja.create(
+              posX,
+              posY - 25,
+              "gate"
+            );
+
+          puertaCaja.body.setSize(
+            42,
             50
           );
 
-
-          caja.body.setOffset(
-            0,
+          puertaCaja.body.setOffset(
+            4,
             0
           );
 
-
-          caja.setData(
-            "xInicial",
-            posX
-          );
-
-
-          caja.setData(
-            "yInicial",
-            posY
-          );
-
-
-          caja.setData(
-            "yObjetivo",
-            posY +
-              CONFIG.FILAS_CAIDA_CAJA *
-                tamanoBloque
-          );
-
-
-          caja.setData(
-            "aterrizada",
-            false
+          puertaCaja.setData(
+            "activa",
+            true
           );
         }
-
-
-        // ==========================================
-        // PINCHOS
-        // ==========================================
 
         else if (
           tipo === 14
@@ -2564,29 +2315,21 @@ class SceneGame extends Phaser.Scene {
               "spike"
             );
 
-
           pinchos.body.setSize(
             46,
             28
           );
-
 
           pinchos.body.setOffset(
             2,
             20
           );
 
-
           pinchos.setData(
             "tipoTrampa",
             "spike"
           );
         }
-
-
-        // ==========================================
-        // SIERRA
-        // ==========================================
 
         else if (
           tipo === 15
@@ -2598,42 +2341,32 @@ class SceneGame extends Phaser.Scene {
               "saw"
             );
 
-
           sierra.body.setCircle(
             18,
             7,
             7
           );
 
-
           sierra.setData(
             "tipoTrampa",
             "saw"
           );
-
 
           sierra.setData(
             "xInicial",
             posX
           );
 
-
           sierra.setData(
             "yInicial",
             posY
           );
-
 
           sierra.setData(
             "fase",
             0
           );
         }
-
-
-        // ==========================================
-        // FRÁGIL
-        // ==========================================
 
         else if (
           tipo === 16
@@ -2645,24 +2378,20 @@ class SceneGame extends Phaser.Scene {
               "fragile"
             );
 
-
           fragil.body.setSize(
             50,
             20
           );
-
 
           fragil.body.setOffset(
             0,
             10
           );
 
-
           fragil.setData(
             "activa",
             true
           );
-
 
           fragil.setData(
             "timer",
@@ -2672,58 +2401,56 @@ class SceneGame extends Phaser.Scene {
       }
     }
 
-
-    // ==================================================
-    // COLISIONES
-    // ==================================================
-
     this.physics.add.collider(
       this.grupoJugadores,
       this.plataformas
     );
-
 
     this.physics.add.collider(
       this.grupoJugadores,
       this.puentes
     );
 
-
     this.physics.add.collider(
       this.grupoJugadores,
       this.trampolines
     );
-
 
     this.physics.add.collider(
       this.grupoJugadores,
       this.cajas
     );
 
+    this.physics.add.collider(
+      this.grupoJugadores,
+      this.cajasMovibles
+    );
+
+    this.physics.add.collider(
+      this.cajasMovibles,
+      this.plataformas
+    );
+
+    this.physics.add.collider(
+      this.cajasMovibles,
+      this.puertasCaja
+    );
+
+    this.physics.add.collider(
+      this.grupoJugadores,
+      this.puertasCaja
+    );
 
     this.physics.add.collider(
       this.grupoJugadores,
       this.plataformasFragiles
     );
 
-
     this.physics.add.collider(
       this.grupoJugadores,
       this.grupoJugadores
     );
 
-
-    // Trampas
-    this.physics.add.overlap(
-      this.grupoJugadores,
-      this.trampas,
-      this.tocarTrampa,
-      null,
-      this
-    );
-
-
-    // Agua
     this.physics.add.overlap(
       this.grupoJugadores,
       this.agua,
@@ -2732,8 +2459,14 @@ class SceneGame extends Phaser.Scene {
       this
     );
 
+    this.physics.add.overlap(
+      this.grupoJugadores,
+      this.trampas,
+      this.tocarTrampa,
+      null,
+      this
+    );
 
-    // Energía
     if (
       this.energia
     ) {
@@ -2746,13 +2479,10 @@ class SceneGame extends Phaser.Scene {
       );
     }
 
-
-    // ==================================================
-    // SOCKET INPUT
-    // ==================================================
-
     socket
-      .off("inputDeJugador")
+      .off(
+        "inputDeJugador"
+      )
       .on(
         "inputDeJugador",
         this.handleInputGame.bind(
@@ -2760,48 +2490,45 @@ class SceneGame extends Phaser.Scene {
         )
       );
 
-
-    // ==================================================
-    // JUGADOR DESCONECTADO
-    // ==================================================
-
     socket
-      .off("jugadorDesconectado")
+      .off(
+        "jugadorDesconectado"
+      )
       .on(
         "jugadorDesconectado",
         (id) => {
           if (
-            this.jugadoresSprites[
+            !this.jugadoresSprites[
               id
             ]
           ) {
-            this.jugadoresAdentro.delete(
-              id
-            );
-
-
-            this.jugadoresSprites[
-              id
-            ].sprite.destroy();
-
-
-            delete this.jugadoresSprites[
-              id
-            ];
-
-
-            contadorColores--;
+            return;
           }
+
+          this.jugadoresAdentro.delete(
+            id
+          );
+
+          this.jugadoresSprites[
+            id
+          ].sprite.destroy();
+
+          delete this.jugadoresSprites[
+            id
+          ];
+
+          contadorColores =
+            Math.max(
+              0,
+              contadorColores - 1
+            );
         }
       );
 
-
-    // ==================================================
-    // NUEVO JUGADOR
-    // ==================================================
-
     socket
-      .off("nuevoJugador")
+      .off(
+        "nuevoJugador"
+      )
       .on(
         "nuevoJugador",
         ({
@@ -2816,14 +2543,11 @@ class SceneGame extends Phaser.Scene {
             return;
           }
 
-
           const cantidad =
             Object.keys(
               this.jugadoresSprites
             ).length;
 
-
-          // Aparecen desde la izquierda
           const player =
             this.grupoJugadores.create(
               90 +
@@ -2833,72 +2557,69 @@ class SceneGame extends Phaser.Scene {
               "player"
             );
 
-
           player.setData(
             "id",
             idDelSocket
           );
 
-
           player
-            .setTint(color)
+            .setTint(
+              color
+            )
             .setCollideWorldBounds(
               true
             )
-            .setScale(0.9);
-
+            .setScale(
+              0.9
+            );
 
           player.body.setSize(
             40,
             40
           );
 
-
-          player.body.setOffset(
-            0,
-            0
-          );
-
-
           player.setDragX(
             2500
           );
-
 
           player.setMaxVelocity(
             CONFIG.VELOCIDAD_JUGADOR,
             1500
           );
 
-
           this.jugadoresSprites[
             idDelSocket
           ] = {
-            sprite: player,
+            sprite:
+              player,
 
             controles: {
-              left: false,
-              right: false,
-              jump: false,
-              up: false,
-              down: false,
+              left:
+                false,
+
+              right:
+                false,
+
+              jump:
+                false,
+
+              up:
+                false,
+
+              down:
+                false,
             },
 
-            adentro: false,
+            adentro:
+              false,
 
             upPressedLastFrame:
               false,
           };
 
-
           contadorColores++;
         }
       );
-
-
-    // ==================================================
-    // SERVIDOR REINICIADO
-    // ==================================================
 
     socket
       .off(
@@ -2907,29 +2628,25 @@ class SceneGame extends Phaser.Scene {
       .on(
         "servidorReiniciado",
         () => {
-          nivelActual = 1;
+          nivelActual =
+            1;
 
           this.scene.restart();
         }
       );
-
 
     socket.emit(
       "pedirJugadoresConectados"
     );
   }
 
-
-  // ====================================================
-  // INPUT
-  // ====================================================
-
-  handleInputGame(input) {
+  handleInputGame(
+    input
+  ) {
     const jugador =
       this.jugadoresSprites[
         input.idDelSocket
       ];
-
 
     if (
       !jugador ||
@@ -2938,11 +2655,9 @@ class SceneGame extends Phaser.Scene {
       return;
     }
 
-
     const activo =
       input.tipoDeEvento ===
       "keydown";
-
 
     if (
       input.teclaPresionada ===
@@ -2952,7 +2667,6 @@ class SceneGame extends Phaser.Scene {
         activo;
     }
 
-
     if (
       input.teclaPresionada ===
       "ArrowRight"
@@ -2960,7 +2674,6 @@ class SceneGame extends Phaser.Scene {
       jugador.controles.right =
         activo;
     }
-
 
     if (
       input.teclaPresionada ===
@@ -2970,7 +2683,6 @@ class SceneGame extends Phaser.Scene {
         activo;
     }
 
-
     if (
       input.teclaPresionada ===
       "ArrowUp"
@@ -2978,7 +2690,6 @@ class SceneGame extends Phaser.Scene {
       jugador.controles.up =
         activo;
     }
-
 
     if (
       input.teclaPresionada ===
@@ -2989,351 +2700,121 @@ class SceneGame extends Phaser.Scene {
     }
   }
 
-
-  // ====================================================
-  // RESPAWN
-  // ====================================================
-
-  respawnEquipo() {
-    if (
-      this.nivelSuperado ||
-      this.reiniciando
-    ) {
-      return;
-    }
-
-
-    this.reiniciando = true;
-
-
-    let indice = 0;
-
-
-    Object.values(
-      this.jugadoresSprites
-    ).forEach(
-      (jugador) => {
-        jugador.sprite
-          .setPosition(
-            90 +
-              indice * 30,
-            450
-          )
-          .setVelocity(
-            0,
-            0
-          )
-          .setVisible(
-            true
-          );
-
-
-        jugador.adentro =
-          false;
-
-
-        jugador.upPressedLastFrame =
-          false;
-
-
-        jugador.sprite.body.allowGravity =
-          true;
-
-
-        indice++;
-      }
-    );
-
-
-    this.jugadoresAdentro.clear();
-
-
-    // Energía
-    this.equipoTieneEnergia =
-      false;
-
-
-    this.jugadorConEnergiaId =
-      null;
-
-
-    this.ultimoTraspasoEnergia =
-      0;
-
-
-    this.esperandoSeparacionEnergia =
-      false;
-
-
-    // Portal
-    this.puertaAbierta =
-      false;
-
-
-    // Placas
-    this.pesoActivado =
-      false;
-
-
-    // Puente vuelve al inicio
-    this.puenteActivado =
-      false;
-
-
-    this.puenteAsegurado =
-      false;
-
-
-    // ==================================================
-    // RESET TRAMPOLINES
-    // ==================================================
-
-    this.trampolines
-      .getChildren()
-      .forEach(
-        (trampolin) => {
-          const timer =
-            trampolin.getData(
-              "timerEvent"
-            );
-
-
-          if (timer) {
-            timer.remove();
-          }
-
-
-          trampolin.setData(
-            "estado",
-            "idle"
-          );
-
-
-          const txt =
-            trampolin.getData(
-              "txt"
-            );
-
-
-          if (txt) {
-            txt.setText(
-              ""
-            );
-          }
-        }
-      );
-
-
-    // ==================================================
-    // RESET SIERRAS
-    // ==================================================
-
-    this.trampas
-      .getChildren()
-      .forEach(
-        (trampa) => {
-          if (
-            trampa.getData(
-              "tipoTrampa"
-            ) !== "saw"
-          ) {
-            return;
-          }
-
-
-          const x =
-            trampa.getData(
-              "xInicial"
-            );
-
-
-          const y =
-            trampa.getData(
-              "yInicial"
-            );
-
-
-          trampa.setPosition(
-            x,
-            y
-          );
-
-
-          trampa.body.reset(
-            x,
-            y
-          );
-
-
-          trampa.angle =
-            0;
-
-
-          trampa.setData(
-            "fase",
-            0
-          );
-        }
-      );
-
-
-    // ==================================================
-    // RESET FRÁGILES
-    // ==================================================
-
-    this.plataformasFragiles
-      .getChildren()
-      .forEach(
-        (plataforma) => {
-          const timer =
-            plataforma.getData(
-              "timer"
-            );
-
-
-          if (timer) {
-            timer.remove();
-          }
-
-
-          plataforma.body.enable =
-            true;
-
-
-          plataforma.setData(
-            "activa",
-            true
-          );
-
-
-          plataforma.setAlpha(
-            1
-          );
-        }
-      );
-
-
-    // ==================================================
-    // RESET CAJAS
-    // ==================================================
-
-    this.cajas
-      .getChildren()
-      .forEach(
-        (caja) => {
-          const x =
-            caja.getData(
-              "xInicial"
-            );
-
-
-          const y =
-            caja.getData(
-              "yInicial"
-            );
-
-
-          caja.setPosition(
-            x,
-            y
-          );
-
-
-          caja.body.reset(
-            x,
-            y
-          );
-
-
-          caja.setData(
-            "aterrizada",
-            false
-          );
-        }
-      );
-
-
-    // ==================================================
-    // RESET ENERGÍA
-    // ==================================================
-
-    if (
-      this.energia
-    ) {
-      this.energia
-        .setVisible(true)
-        .setPosition(
-          this.energiaOriginalX,
-          this.energiaOriginalY
-        );
-
-
-      this.energia.body.enable =
-        true;
-    }
-
-
-    // ==================================================
-    // RESET PORTAL
-    // ==================================================
-
-    if (
-      this.puerta
-    ) {
-      this.puerta
-        .setTexture(
-          "door"
-        )
-        .refreshBody();
-    }
-
-
-    this.time.delayedCall(
-      CONFIG.TIEMPO_RESPAWN,
-      () => {
-        this.reiniciando =
-          false;
-      }
-    );
-  }
-
-
-  // ====================================================
-  // TRAMPAS
-  // ====================================================
-
-  tocarTrampa(
-    jugador,
-    trampa
+  agarrarEnergia(
+    a,
+    b
   ) {
     if (
-      this.nivelSuperado ||
-      this.reiniciando
+      this.equipoTieneEnergia
     ) {
       return;
     }
 
+    const jugador =
+      a.texture.key ===
+      "player"
+        ? a
+        : b;
 
-    const tipo =
-      trampa.getData(
-        "tipoTrampa"
+    const energia =
+      a.texture.key ===
+      "energy"
+        ? a
+        : b;
+
+    this.equipoTieneEnergia =
+      true;
+
+    this.jugadorConEnergiaId =
+      jugador.getData(
+        "id"
       );
 
+    energia.body.enable =
+      false;
+  }
+
+  transferirEnergiaEntreJugadores(
+    time
+  ) {
+    if (
+      !this.equipoTieneEnergia ||
+      !this.jugadorConEnergiaId
+    ) {
+      return;
+    }
 
     if (
-      tipo === "spike" ||
-      tipo === "saw"
+      this.esperandoSeparacionEnergia
+    ) {
+      return;
+    }
+
+    if (
+      time <
+      this.ultimoTraspasoEnergia
+    ) {
+      return;
+    }
+
+    const portador =
+      this.jugadoresSprites[
+        this.jugadorConEnergiaId
+      ];
+
+    if (
+      !portador ||
+      portador.adentro
+    ) {
+      return;
+    }
+
+    for (
+      const [
+        id,
+        jugador,
+      ] of Object.entries(
+        this.jugadoresSprites
+      )
+    ) {
+      if (
+        id ===
+          this.jugadorConEnergiaId ||
+        jugador.adentro
+      ) {
+        continue;
+      }
+
+      if (
+        Phaser.Geom.Intersects.RectangleToRectangle(
+          portador.sprite.getBounds(),
+          jugador.sprite.getBounds()
+        )
+      ) {
+        this.jugadorConEnergiaId =
+          id;
+
+        this.ultimoTraspasoEnergia =
+          time + 300;
+
+        this.esperandoSeparacionEnergia =
+          true;
+
+        break;
+      }
+    }
+  }
+
+  tocarTrampa() {
+    if (
+      !this.nivelSuperado &&
+      !this.reiniciando
     ) {
       this.respawnEquipo();
     }
   }
 
-
-  // ====================================================
-  // PLATAFORMA FRÁGIL
-  // ====================================================
-
-  activarPlataformaFragil(
+  activarFragil(
     plataforma
   ) {
     if (
@@ -3344,12 +2825,10 @@ class SceneGame extends Phaser.Scene {
       return;
     }
 
-
     plataforma.setData(
       "activa",
       false
     );
-
 
     const timer =
       this.time.delayedCall(
@@ -3362,20 +2841,12 @@ class SceneGame extends Phaser.Scene {
             return;
           }
 
-
           plataforma.body.enable =
             false;
 
-
-          this.tweens.add({
-            targets:
-              plataforma,
-
-            alpha: 0.15,
-
-            duration: 180,
-          });
-
+          plataforma.setAlpha(
+            0.15
+          );
 
           const volver =
             this.time.delayedCall(
@@ -3388,28 +2859,19 @@ class SceneGame extends Phaser.Scene {
                   return;
                 }
 
-
                 plataforma.body.enable =
                   true;
-
 
                 plataforma.setData(
                   "activa",
                   true
                 );
 
-
-                this.tweens.add({
-                  targets:
-                    plataforma,
-
-                  alpha: 1,
-
-                  duration: 220,
-                });
+                plataforma.setAlpha(
+                  1
+                );
               }
             );
-
 
           plataforma.setData(
             "timer",
@@ -3418,216 +2880,246 @@ class SceneGame extends Phaser.Scene {
         }
       );
 
-
     plataforma.setData(
       "timer",
       timer
     );
-
-
-    this.tweens.add({
-      targets:
-        plataforma,
-
-      alpha: 0.45,
-
-      duration: 180,
-    });
   }
 
-
-  // ====================================================
-  // AGARRAR ENERGÍA
-  // ====================================================
-
-  agarrarEnergia(
-    a,
-    b
-  ) {
+  respawnEquipo() {
     if (
-      this.equipoTieneEnergia
+      this.nivelSuperado ||
+      this.reiniciando
     ) {
       return;
     }
 
-
-    const jugador =
-      a.texture.key ===
-      "player"
-        ? a
-        : b;
-
-
-    const energia =
-      a.texture.key ===
-      "energy"
-        ? a
-        : b;
-
-
-    this.equipoTieneEnergia =
+    this.reiniciando =
       true;
 
+    let indice = 0;
 
-    this.jugadorConEnergiaId =
-      jugador.getData(
-        "id"
-      );
+    Object.values(
+      this.jugadoresSprites
+    ).forEach(
+      (
+        jugador
+      ) => {
+        jugador.sprite
+          .setPosition(
+            90 +
+              indice *
+                30,
+            450
+          )
+          .setVelocity(
+            0,
+            0
+          )
+          .setVisible(
+            true
+          );
 
+        jugador.adentro =
+          false;
 
-    // Queda visible sobre el jugador
-    energia.setVisible(
-      true
-    );
+        jugador.upPressedLastFrame =
+          false;
 
-
-    // No puede volver a recogerse
-    energia.body.enable =
-      false;
-  }
-
-
-  // ====================================================
-  // TRANSFERIR ENERGÍA
-  // ====================================================
-
-  transferirEnergiaEntreJugadores(
-    time
-  ) {
-    if (
-      !this.equipoTieneEnergia ||
-      !this.jugadorConEnergiaId
-    ) {
-      this.esperandoSeparacionEnergia =
-        false;
-
-      return;
-    }
-
-
-    const portador =
-      this.jugadoresSprites[
-        this.jugadorConEnergiaId
-      ];
-
-
-    if (
-      !portador ||
-      portador.adentro
-    ) {
-      return;
-    }
-
-
-    // Detectar si todavía siguen tocándose
-    let siguenJuntos =
-      false;
-
-
-    for (
-      const [
-        id,
-        jugador,
-      ] of Object.entries(
-        this.jugadoresSprites
-      )
-    ) {
-      if (
-        id ===
-          this.jugadorConEnergiaId ||
-        jugador.adentro
-      ) {
-        continue;
-      }
-
-
-      if (
-        Phaser.Geom.Intersects.RectangleToRectangle(
-          portador.sprite.getBounds(),
-          jugador.sprite.getBounds()
-        )
-      ) {
-        siguenJuntos =
+        jugador.sprite.body.allowGravity =
           true;
 
-        break;
+        indice++;
       }
-    }
+    );
 
+    this.jugadoresAdentro.clear();
 
-    // Si se separaron, puede volver a transferirse.
-    if (!siguenJuntos) {
-      this.esperandoSeparacionEnergia =
-        false;
-    }
+    this.equipoTieneEnergia =
+      false;
 
+    this.jugadorConEnergiaId =
+      null;
+
+    this.ultimoTraspasoEnergia =
+      0;
+
+    this.esperandoSeparacionEnergia =
+      false;
+
+    this.puertaAbierta =
+      false;
 
     if (
-      this.esperandoSeparacionEnergia
+      this.puerta
     ) {
-      return;
+      this.puerta.setTexture(
+        "door"
+      );
     }
 
+    this.pesoActivado =
+      false;
+
+    this.puenteActivado =
+      false;
+
+    this.puenteAsegurado =
+      false;
+
+    this.cajasMovibles
+      .getChildren()
+      .forEach(
+        (
+          caja
+        ) => {
+          const x =
+            caja.getData(
+              "xInicial"
+            );
+
+          const y =
+            caja.getData(
+              "yInicial"
+            );
+
+          caja.setPosition(
+            x,
+            y
+          );
+
+          caja.body.reset(
+            x,
+            y
+          );
+
+          caja.setVelocity(
+            0,
+            0
+          );
+
+          caja.setAccelerationX(
+            0
+          );
+        }
+      );
+
+    this.puertasCaja
+      .getChildren()
+      .forEach(
+        (
+          puerta
+        ) => {
+          puerta.body.enable =
+            true;
+
+          puerta.setAlpha(
+            1
+          );
+        }
+      );
+
+    this.trampolines
+      .getChildren()
+      .forEach(
+        (
+          trampolin
+        ) => {
+          trampolin.setData(
+            "cooldownHasta",
+            0
+          );
+        }
+      );
+
+    this.plataformasFragiles
+      .getChildren()
+      .forEach(
+        (
+          plataforma
+        ) => {
+          const timer =
+            plataforma.getData(
+              "timer"
+            );
+
+          if (
+            timer
+          ) {
+            timer.remove();
+          }
+
+          plataforma.body.enable =
+            true;
+
+          plataforma.setData(
+            "activa",
+            true
+          );
+
+          plataforma.setAlpha(
+            1
+          );
+        }
+      );
+
+    this.cajas
+      .getChildren()
+      .forEach(
+        (
+          caja
+        ) => {
+          const x =
+            caja.getData(
+              "xInicial"
+            );
+
+          const y =
+            caja.getData(
+              "yInicial"
+            );
+
+          caja.setPosition(
+            x,
+            y
+          );
+
+          caja.body.reset(
+            x,
+            y
+          );
+
+          caja.setData(
+            "aterrizada",
+            false
+          );
+        }
+      );
 
     if (
-      time <
-      this.ultimoTraspasoEnergia
+      this.energia
     ) {
-      return;
-    }
-
-
-    // Buscar jugador tocando al portador
-    for (
-      const [
-        id,
-        jugador,
-      ] of Object.entries(
-        this.jugadoresSprites
-      )
-    ) {
-      if (
-        id ===
-          this.jugadorConEnergiaId ||
-        jugador.adentro
-      ) {
-        continue;
-      }
-
-
-      const seTocan =
-        Phaser.Geom.Intersects.RectangleToRectangle(
-          portador.sprite.getBounds(),
-          jugador.sprite.getBounds()
+      this.energia
+        .setPosition(
+          this.energiaOriginalX,
+          this.energiaOriginalY
+        )
+        .setVisible(
+          true
         );
 
-
-      if (!seTocan) {
-        continue;
-      }
-
-
-      // Transferencia
-      this.jugadorConEnergiaId =
-        id;
-
-
-      this.ultimoTraspasoEnergia =
-        time + 300;
-
-
-      this.esperandoSeparacionEnergia =
+      this.energia.body.enable =
         true;
-
-
-      break;
     }
+
+    this.time.delayedCall(
+      CONFIG.TIEMPO_RESPAWN,
+      () => {
+        this.reiniciando =
+          false;
+      }
+    );
   }
-
-
-  // ====================================================
-  // VICTORIA
-  // ====================================================
 
   victoria() {
     if (
@@ -3636,85 +3128,14 @@ class SceneGame extends Phaser.Scene {
       return;
     }
 
-
     this.nivelSuperado =
       true;
-
-
-    this.plataformas.clear(
-      true,
-      true
-    );
-
-
-    this.agua.clear(
-      true,
-      true
-    );
-
-
-    this.botones.clear(
-      true,
-      true
-    );
-
-
-    this.puentes.clear(
-      true,
-      true
-    );
-
-
-    this.trampolines.clear(
-      true,
-      true
-    );
-
-
-    this.cajas.clear(
-      true,
-      true
-    );
-
-
-    this.placasPeso.clear(
-      true,
-      true
-    );
-
-
-    this.trampas.clear(
-      true,
-      true
-    );
-
-
-    this.plataformasFragiles.clear(
-      true,
-      true
-    );
-
-
-    if (
-      this.energia
-    ) {
-      this.energia.destroy();
-    }
-
-
-    if (
-      this.puerta
-    ) {
-      this.puerta.destroy();
-    }
-
 
     const mensaje =
       nivelActual <
       CONFIG.TOTAL_NIVELES
         ? `⚡ ¡NIVEL ${nivelActual} SUPERADO! ⚡\nEl equipo llegó al siguiente sector`
         : `🚀 ¡MISIÓN COMPLETADA! 🚀\nTodo el equipo llegó al portal`;
-
 
     this.txtVictoria
       .setText(
@@ -3724,104 +3145,86 @@ class SceneGame extends Phaser.Scene {
         true
       );
 
-
     this.time.delayedCall(
       CONFIG.TIEMPO_VICTORIA,
       () => {
-        if (
+        nivelActual =
           nivelActual <
           CONFIG.TOTAL_NIVELES
-        ) {
-          nivelActual++;
-        } else {
-          nivelActual = 1;
-        }
-
+            ? nivelActual + 1
+            : 1;
 
         this.scene.restart();
       }
     );
   }
 
-
-  // ====================================================
-  // UPDATE
-  // ====================================================
-
   update(
     time,
     delta
   ) {
     if (
-      !this.jugadoresSprites ||
       this.nivelSuperado
     ) {
       return;
     }
-
 
     const jugadores =
       Object.entries(
         this.jugadoresSprites
       );
 
-
-    const totalJugadores =
-      jugadores.length;
-
-
     if (
-      totalJugadores === 0
+      jugadores.length === 0
     ) {
       return;
     }
 
-
-    // ==================================================
-    // CÁMARA
-    // ==================================================
-
     const afuera =
       jugadores.filter(
-        ([, jugador]) =>
+        (
+          [
+            ,
+            jugador,
+          ]
+        ) =>
           !jugador.adentro
       );
 
-
     if (
-      afuera.length > 0
+      afuera.length
     ) {
-      const sumaX =
+      const centro =
         afuera.reduce(
           (
             suma,
-            [, jugador]
+            [
+              ,
+              jugador,
+            ]
           ) =>
             suma +
             jugador.sprite.x,
           0
-        );
+        ) /
+        afuera.length;
 
-
-      const mapaAncho =
+      const ancho =
         obtenerMapaActual()[0]
           .length *
         CONFIG.TAMANO_BLOQUE;
 
-
       const targetX =
         Phaser.Math.Clamp(
-          sumaX /
-            afuera.length -
+          centro -
             400,
           0,
           Math.max(
             0,
-            mapaAncho -
+            ancho -
               800
           )
         );
-
 
       this.cameras.main.scrollX +=
         (
@@ -3830,11 +3233,6 @@ class SceneGame extends Phaser.Scene {
         ) *
         0.12;
     }
-
-
-    // ==================================================
-    // ENERGÍA
-    // ==================================================
 
     if (
       this.equipoTieneEnergia &&
@@ -3845,7 +3243,6 @@ class SceneGame extends Phaser.Scene {
         this.jugadoresSprites[
           this.jugadorConEnergiaId
         ];
-
 
       if (
         portador &&
@@ -3859,31 +3256,25 @@ class SceneGame extends Phaser.Scene {
       }
     }
 
-
-    // ==================================================
-    // BOTONES
-    // ==================================================
-
     let botonInicialPisado =
       false;
 
     let botonFinalPisado =
       false;
 
-
     this.botones
       .getChildren()
       .forEach(
-        (boton) => {
+        (
+          boton
+        ) => {
           let pisado =
             false;
-
 
           const tipoBoton =
             boton.getData(
               "tipoBoton"
             );
-
 
           for (
             const [
@@ -3896,7 +3287,6 @@ class SceneGame extends Phaser.Scene {
             ) {
               continue;
             }
-
 
             if (
               Phaser.Geom.Intersects.RectangleToRectangle(
@@ -3911,12 +3301,12 @@ class SceneGame extends Phaser.Scene {
             }
           }
 
-
-          if (pisado) {
+          if (
+            pisado
+          ) {
             boton.setTint(
               0x9cff57
             );
-
 
             if (
               tipoBoton ===
@@ -3926,7 +3316,6 @@ class SceneGame extends Phaser.Scene {
                 true;
             }
 
-
             if (
               tipoBoton ===
               2
@@ -3934,53 +3323,29 @@ class SceneGame extends Phaser.Scene {
               botonFinalPisado =
                 true;
             }
-          } else {
+          }
+
+          else {
             boton.clearTint();
           }
         }
       );
 
-
-    // ==================================================
-    // PRIMER BOTÓN
-    // ==================================================
-
-    if (
-      botonInicialPisado
-    ) {
-      this.puenteActivado =
-        true;
-    }
-
-
-    // ==================================================
-    // SEGUNDO BOTÓN
-    // ==================================================
-
-    if (
-      botonFinalPisado
-    ) {
-      this.puenteAsegurado =
-        true;
-    }
-
-
-    // ==================================================
-    // PUENTE
-    // ==================================================
-
     const puenteActivo =
-      this.puenteActivado ||
-      this.puenteAsegurado;
+      botonInicialPisado ||
+      botonFinalPisado;
 
+    this.puenteActivado =
+      puenteActivo;
 
     this.puentes
       .getChildren()
       .forEach(
-        (puente) => {
+        (
+          puente
+        ) => {
           puente.body.enable =
             puenteActivo;
-
 
           puente.setAlpha(
             puenteActivo
@@ -3990,165 +3355,113 @@ class SceneGame extends Phaser.Scene {
         }
       );
 
-
-    // Para los trampolines
-    const botonPresionado =
-      botonInicialPisado ||
-      botonFinalPisado;
-
-
-    // ==================================================
-    // TRAMPOLINES
-    // ==================================================
-
     this.trampolines
       .getChildren()
       .forEach(
-        (trampolin) => {
-          if (
-            botonPresionado &&
+        (
+          trampolin
+        ) => {
+          const cooldownHasta =
             trampolin.getData(
-              "estado"
-            ) ===
-              "idle"
+              "cooldownHasta"
+            ) || 0;
+
+          if (
+            time <
+            cooldownHasta
           ) {
-            trampolin.setData(
-              "estado",
-              "contando"
-            );
+            return;
+          }
 
+          for (
+            const [
+              ,
+              jugador,
+            ] of jugadores
+          ) {
+            if (
+              jugador.adentro
+            ) {
+              continue;
+            }
 
-            let contador =
-              3;
+            const p =
+              jugador.sprite;
 
-
-            const texto =
-              trampolin.getData(
-                "txt"
+            const diferenciaX =
+              Math.abs(
+                p.x -
+                  trampolin.x
               );
 
+            const diferenciaY =
+              p.y -
+              trampolin.y;
 
-            texto.setText(
-              contador
-            );
+            const estaAbajo =
+              diferenciaY >=
+                -85 &&
+              diferenciaY <=
+                20;
 
+            const estaApoyado =
+              p.body.blocked.down ||
+              p.body.touching.down;
 
-            const evento =
-              this.time.addEvent({
-                delay: 1000,
+            const estaSubiendo =
+              p.body.velocity.y <
+              -50;
 
-                repeat: 2,
+            if (
+              diferenciaX <=
+                36 &&
+              estaAbajo &&
+              estaApoyado &&
+              !estaSubiendo
+            ) {
+              p.setVelocityY(
+                -850
+              );
 
-                callback:
-                  () => {
-                    contador--;
+              trampolin.setData(
+                "cooldownHasta",
+                time + 900
+              );
 
+              this.tweens.add({
+                targets:
+                  trampolin,
 
-                    if (
-                      contador > 0
-                    ) {
-                      texto.setText(
-                        contador
-                      );
+                scaleY:
+                  0.8,
 
-                      return;
-                    }
+                duration:
+                  90,
 
-
-                    texto.setText(
-                      ""
-                    );
-
-
-                    trampolin.setData(
-                      "estado",
-                      "disparado"
-                    );
-
-
-                    Object.values(
-                      this.jugadoresSprites
-                    ).forEach(
-                      (jugador) => {
-                        if (
-                          jugador.adentro
-                        ) {
-                          return;
-                        }
-
-
-                        const p =
-                          jugador.sprite;
-
-
-                        const diferenciaX =
-                          Math.abs(
-                            p.x -
-                              trampolin.x
-                          );
-
-
-                        const diferenciaY =
-                          trampolin.y -
-                          p.y;
-
-
-                        if (
-                          diferenciaX <
-                            45 &&
-                          diferenciaY >
-                            0 &&
-                          diferenciaY <
-                            80
-                        ) {
-                          p.setVelocityY(
-                            -900
-                          );
-                        }
-                      }
-                    );
-
-
-                    this.time.delayedCall(
-                      1200,
-                      () => {
-                        trampolin.setData(
-                          "estado",
-                          "idle"
-                        );
-                      }
-                    );
-                  },
+                yoyo:
+                  true,
               });
 
-
-            trampolin.setData(
-              "timerEvent",
-              evento
-            );
+              break;
+            }
           }
         }
       );
 
-
-    // ==================================================
-    // PLACAS
-    // ==================================================
-
     if (
       !this.pesoActivado
     ) {
-      const jugadoresEnPlacas =
+      const sobrePlaca =
         new Set();
-
 
       this.placasPeso
         .getChildren()
         .forEach(
-          (placa) => {
+          (
+            placa
+          ) => {
             let pisada =
               false;
-
 
             for (
               const [
@@ -4162,7 +3475,6 @@ class SceneGame extends Phaser.Scene {
                 continue;
               }
 
-
               if (
                 Phaser.Geom.Intersects.RectangleToRectangle(
                   jugador.sprite.getBounds(),
@@ -4172,13 +3484,11 @@ class SceneGame extends Phaser.Scene {
                 pisada =
                   true;
 
-
-                jugadoresEnPlacas.add(
+                sobrePlaca.add(
                   id
                 );
               }
             }
-
 
             if (
               pisada
@@ -4186,25 +3496,30 @@ class SceneGame extends Phaser.Scene {
               placa.setTint(
                 0xffff55
               );
-            } else {
+            }
+
+            else {
               placa.clearTint();
             }
           }
         );
 
-
       if (
-        jugadoresEnPlacas.size >=
+        sobrePlaca.size >=
         CONFIG.JUGADORES_PESO_CAJA
       ) {
         this.pesoActivado =
           true;
       }
-    } else {
+    }
+
+    else {
       this.placasPeso
         .getChildren()
         .forEach(
-          (placa) => {
+          (
+            placa
+          ) => {
             placa.setTint(
               0x55ff55
             );
@@ -4212,18 +3527,15 @@ class SceneGame extends Phaser.Scene {
         );
     }
 
-
-    // ==================================================
-    // CAJAS
-    // ==================================================
-
     if (
       this.pesoActivado
     ) {
       this.cajas
         .getChildren()
         .forEach(
-          (caja) => {
+          (
+            caja
+          ) => {
             if (
               caja.getData(
                 "aterrizada"
@@ -4232,12 +3544,10 @@ class SceneGame extends Phaser.Scene {
               return;
             }
 
-
             const objetivo =
               caja.getData(
                 "yObjetivo"
               );
-
 
             const avance =
               CONFIG
@@ -4247,7 +3557,6 @@ class SceneGame extends Phaser.Scene {
                 1000
               );
 
-
             const nuevoY =
               Math.min(
                 caja.y +
@@ -4255,18 +3564,15 @@ class SceneGame extends Phaser.Scene {
                 objetivo
               );
 
-
             caja.setPosition(
               caja.x,
               nuevoY
             );
 
-
             caja.body.reset(
               caja.x,
               nuevoY
             );
-
 
             if (
               nuevoY >=
@@ -4281,72 +3587,65 @@ class SceneGame extends Phaser.Scene {
         );
     }
 
-
-    // ==================================================
-    // SIERRAS
-    // ==================================================
-
     this.trampas
       .getChildren()
       .forEach(
-        (trampa) => {
+        (
+          trampa
+        ) => {
           if (
             trampa.getData(
               "tipoTrampa"
-            ) !== "saw"
+            ) !==
+            "saw"
           ) {
             return;
           }
-
 
           const xInicial =
             trampa.getData(
               "xInicial"
             );
 
-
           const yInicial =
             trampa.getData(
               "yInicial"
             );
 
-
-          let fase =
-            trampa.getData(
-              "fase"
-            );
-
-
-          fase +=
-            (delta || 16) /
+          const fase =
+            (
+              trampa.getData(
+                "fase"
+              ) || 0
+            ) +
+            (
+              delta ||
+              16
+            ) /
             1000;
-
 
           const nuevaX =
             xInicial +
             Math.sin(
-              fase * 2.2
+              fase *
+                2.2
             ) *
-              115;
-
+            115;
 
           trampa.setData(
             "fase",
             fase
           );
 
-
           trampa.setPosition(
             nuevaX,
             yInicial
           );
 
-
           trampa.body.reset(
             nuevaX,
             yInicial
           );
-
 
           trampa.angle +=
             CONFIG
@@ -4358,15 +3657,12 @@ class SceneGame extends Phaser.Scene {
         }
       );
 
-
-    // ==================================================
-    // FRÁGILES
-    // ==================================================
-
     this.plataformasFragiles
       .getChildren()
       .forEach(
-        (plataforma) => {
+        (
+          plataforma
+        ) => {
           if (
             !plataforma.getData(
               "activa"
@@ -4374,7 +3670,6 @@ class SceneGame extends Phaser.Scene {
           ) {
             return;
           }
-
 
           for (
             const [
@@ -4388,28 +3683,21 @@ class SceneGame extends Phaser.Scene {
               continue;
             }
 
-
             if (
               Phaser.Geom.Intersects.RectangleToRectangle(
                 jugador.sprite.getBounds(),
                 plataforma.getBounds()
               )
             ) {
-              this.activarPlataformaFragil(
+              this.activarFragil(
                 plataforma
               );
-
 
               break;
             }
           }
         }
       );
-
-
-    // ==================================================
-    // MOVIMIENTO
-    // ==================================================
 
     for (
       const [
@@ -4420,64 +3708,45 @@ class SceneGame extends Phaser.Scene {
       const p =
         jugador.sprite;
 
-
-      // ==============================================
-      // DENTRO DEL PORTAL
-      // ==============================================
-
       if (
         jugador.adentro
       ) {
-        p.setPosition(
-          this.puerta.x,
-          this.puerta.y
-        );
-
-
-        p.setVelocity(
-          0,
-          0
-        );
-
+        p
+          .setPosition(
+            this.puertaX,
+            this.puertaY
+          )
+          .setVelocity(
+            0,
+            0
+          );
 
         p.body.allowGravity =
           false;
 
-
         if (
-          jugador.controles
-            .down
+          jugador.controles.down
         ) {
           jugador.adentro =
             false;
-
 
           p.setVisible(
             true
           );
 
-
           p.body.allowGravity =
             true;
-
 
           this.jugadoresAdentro.delete(
             id
           );
         }
 
-
         continue;
       }
 
-
-      // ==============================================
-      // IZQUIERDA
-      // ==============================================
-
       if (
-        jugador.controles
-          .left
+        jugador.controles.left
       ) {
         p.setAccelerationX(
           -CONFIG
@@ -4485,14 +3754,8 @@ class SceneGame extends Phaser.Scene {
         );
       }
 
-
-      // ==============================================
-      // DERECHA
-      // ==============================================
-
       else if (
-        jugador.controles
-          .right
+        jugador.controles.right
       ) {
         p.setAccelerationX(
           CONFIG
@@ -4500,36 +3763,23 @@ class SceneGame extends Phaser.Scene {
         );
       }
 
-
       else {
         p.setAccelerationX(
           0
         );
       }
 
-
-      // ==============================================
-      // SALTO
-      // ==============================================
-
       if (
-        jugador.controles
-          .jump &&
+        jugador.controles.jump &&
         p.body.blocked.down
       ) {
         p.setVelocityY(
           -CONFIG.SALTO_FUERZA
         );
 
-
-        jugador.controles
-          .jump = false;
+        jugador.controles.jump =
+          false;
       }
-
-
-      // ==============================================
-      // PORTAL
-      // ==============================================
 
       if (
         this.puerta
@@ -4537,18 +3787,18 @@ class SceneGame extends Phaser.Scene {
         const cerca =
           Math.abs(
             p.x -
-              this.puerta.x
-          ) < 45 &&
+              this.puertaX
+          ) <
+            45 &&
           Math.abs(
             p.y -
-              this.puerta.y
-          ) < 70;
-
+              this.puertaY
+          ) <
+            70;
 
         if (
           cerca
         ) {
-          // Abrir con energía
           if (
             !this.puertaAbierta &&
             this.equipoTieneEnergia
@@ -4556,52 +3806,39 @@ class SceneGame extends Phaser.Scene {
             this.puertaAbierta =
               true;
 
-
-            this.puerta
-              .setTexture(
-                "doorOpen"
-              )
-              .refreshBody();
+            this.puerta.setTexture(
+              "doorOpen"
+            );
           }
 
-
-          // Entrar con arriba
           if (
             this.puertaAbierta &&
-            jugador.controles
-              .up &&
+            jugador.controles.up &&
             !jugador.upPressedLastFrame
           ) {
             jugador.adentro =
               true;
 
-
             p.setVisible(
               false
             );
 
-
             p.body.allowGravity =
               false;
-
 
             p.setVelocity(
               0,
               0
             );
 
-
             this.jugadoresAdentro.add(
               id
             );
           }
 
-
           jugador.upPressedLastFrame =
-            jugador.controles
-              .up;
+            jugador.controles.up;
         }
-
 
         else {
           jugador.upPressedLastFrame =
@@ -4610,59 +3847,55 @@ class SceneGame extends Phaser.Scene {
       }
     }
 
-
-    // ==================================================
-    // TRANSFERENCIA DE ENERGÍA
-    // ==================================================
-
     this.transferirEnergiaEntreJugadores(
       time
     );
 
-
-    // ==================================================
-    // VICTORIA
-    // ==================================================
-
     if (
       this.puertaAbierta &&
-      totalJugadores > 0 &&
+      jugadores.length > 0 &&
       this.jugadoresAdentro.size >=
-        totalJugadores
+        jugadores.length
     ) {
       this.victoria();
     }
   }
 }
 
-
-// ======================================================
-// CONFIGURACIÓN PHASER
-// ======================================================
-
 const config = {
-  type: Phaser.AUTO,
+  type:
+    Phaser.AUTO,
 
-  width: 800,
-  height: 600,
+  width:
+    800,
 
-  parent: "juego",
+  height:
+    600,
+
+  parent:
+    "juego",
 
   physics: {
-    default: "arcade",
+    default:
+      "arcade",
 
     arcade: {
       gravity: {
-        y: CONFIG.GRAVEDAD,
+        y:
+          CONFIG.GRAVEDAD,
       },
 
-      debug: false,
+      debug:
+        false,
 
-      fps: 120,
+      fps:
+        120,
 
-      overlapBias: 16,
+      overlapBias:
+        16,
 
-      separationBias: 10,
+      separationBias:
+        10,
     },
   },
 
@@ -4670,11 +3903,6 @@ const config = {
     SceneGame,
   ],
 };
-
-
-// ======================================================
-// INICIAR JUEGO
-// ======================================================
 
 new Phaser.Game(
   config

@@ -2,25 +2,24 @@ const express = require("express");
 const app = express();
 const http = require("http").Server(app);
 const io = require("socket.io")(http);
-const os = os = require("os");
+const os = require("os");
 const client = require("prom-client");
 
-// --- CONFIGURACIÓN DE PROMETHEUS ---
+// 1. Inicializar métricas por defecto de Node.js (CPU, memoria, etc.)
 const collectDefaultMetrics = client.collectDefaultMetrics;
 collectDefaultMetrics({ prefix: 'picopark_' });
 
-// Métrica personalizada para los jugadores conectados (Gauge para valores que suben y bajan)
+// 2. Métrica customizada: Jugadores conectados (Gauge para valores que suben y bajan)
 const activePlayersGauge = new client.Gauge({
   name: 'picopark_active_players',
   help: 'Numero actual de gamepads/jugadores conectados al servidor'
 });
 
-// Métrica personalizada para conexiones totales aceptadas (Counter para valores que solo incrementan)
+// 3. Métrica customizada: Total histórico de conexiones aceptadas (Counter)
 const totalConnectionsCounter = new client.Counter({
   name: 'picopark_total_connections_count',
   help: 'Total historico de conexiones de gamepads aceptadas'
 });
-// ------------------------------------
 
 app.use(express.static("public"));
 
@@ -102,7 +101,7 @@ io.on("connection", (socket) => {
     }
     gamepadsConectados.add(socket.id);
     
-    // Actualizamos la métrica en Prometheus
+    // Actualizamos las métricas cuando entra un jugador
     activePlayersGauge.set(gamepadsConectados.size);
     totalConnectionsCounter.inc();
 
@@ -115,6 +114,7 @@ io.on("connection", (socket) => {
   } else {
     console.log("Conexion ignorada (tipo desconocido)");
   }
+  
   socket.on("pedirJugadoresConectados", () => {
     let indice = 0;
     gamepadsConectados.forEach((id) => {
@@ -125,6 +125,7 @@ io.on("connection", (socket) => {
       indice++;
     });
   });
+
   socket.on("message", (msg) => {
     io.emit("inputDeJugador", {
       idDelSocket: socket.id,
@@ -143,7 +144,7 @@ io.on("connection", (socket) => {
     } else if (esGamepad) {
       gamepadsConectados.delete(socket.id);
       
-      // Actualizamos la métrica cuando un jugador se va
+      // Actualizamos la métrica cuando se desconecta un jugador
       activePlayersGauge.set(gamepadsConectados.size);
 
       console.log(
@@ -161,7 +162,6 @@ http.listen(PUERTO, "0.0.0.0", () => {
 
 function cerrarServidor() {
   console.log("Apagando servidor...");
-
   io.emit("servidorApagado");
 
   io.sockets.sockets.forEach((socket) => {

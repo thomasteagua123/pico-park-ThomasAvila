@@ -2,7 +2,25 @@ const express = require("express");
 const app = express();
 const http = require("http").Server(app);
 const io = require("socket.io")(http);
-const os = require("os");
+const os = os = require("os");
+const client = require("prom-client");
+
+// --- CONFIGURACIÓN DE PROMETHEUS ---
+const collectDefaultMetrics = client.collectDefaultMetrics;
+collectDefaultMetrics({ prefix: 'picopark_' });
+
+// Métrica personalizada para los jugadores conectados (Gauge para valores que suben y bajan)
+const activePlayersGauge = new client.Gauge({
+  name: 'picopark_active_players',
+  help: 'Numero actual de gamepads/jugadores conectados al servidor'
+});
+
+// Métrica personalizada para conexiones totales aceptadas (Counter para valores que solo incrementan)
+const totalConnectionsCounter = new client.Counter({
+  name: 'picopark_total_connections_count',
+  help: 'Total historico de conexiones de gamepads aceptadas'
+});
+// ------------------------------------
 
 app.use(express.static("public"));
 
@@ -56,6 +74,17 @@ app.get("/ip", (req, res) => {
   res.json({ ip });
 });
 
+// --- ENDPOINT DE MÉTRICAS PARA PROMETHEUS ---
+app.get("/metrics", async (req, res) => {
+  try {
+    res.set("Content-Type", client.register.contentType);
+    res.end(await client.register.metrics());
+  } catch (ex) {
+    res.status(500).end(ex);
+  }
+});
+// -------------------------------------------
+
 io.on("connection", (socket) => {
   const tipo = socket.handshake.query.tipo;
   const esPantalla = tipo === "pantalla";
@@ -72,6 +101,11 @@ io.on("connection", (socket) => {
       return;
     }
     gamepadsConectados.add(socket.id);
+    
+    // Actualizamos la métrica en Prometheus
+    activePlayersGauge.set(gamepadsConectados.size);
+    totalConnectionsCounter.inc();
+
     const indice = gamepadsConectados.size - 1;
     console.log(`Gamepad conectado - jugadores: ${gamepadsConectados.size}`);
     io.emit("nuevoJugador", {
@@ -108,6 +142,10 @@ io.on("connection", (socket) => {
       console.log("Videojuego desconectado");
     } else if (esGamepad) {
       gamepadsConectados.delete(socket.id);
+      
+      // Actualizamos la métrica cuando un jugador se va
+      activePlayersGauge.set(gamepadsConectados.size);
+
       console.log(
         `Gamepad desconectado - jugadores: ${gamepadsConectados.size}`,
       );
@@ -124,29 +162,22 @@ http.listen(PUERTO, "0.0.0.0", () => {
 function cerrarServidor() {
   console.log("Apagando servidor...");
 
-  // Avisar a los clientes (opcional)
   io.emit("servidorApagado");
 
-  // Desconectar todos los sockets
   io.sockets.sockets.forEach((socket) => {
     socket.disconnect(true);
   });
 
-  // Cerrar servidor HTTP
   http.close(() => {
     console.log("Servidor cerrado correctamente");
     process.exit(0);
   });
 
-  // Failsafe (por si algo queda colgado)
   setTimeout(() => {
     console.log("Forzando cierre del servidor");
     process.exit(1);
   }, 3000);
 }
 
-// Ctrl + C
 process.on("SIGINT", cerrarServidor);
-
-// También cubre kill en algunos sistemas
 process.on("SIGTERM", cerrarServidor);

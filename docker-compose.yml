@@ -1,15 +1,9 @@
-version: '3.8'
-
 services:
-  pico-server:
+  server:
     build:
       context: ./Game
-      dockerfile: Dockerfile
+    image: ghcr.io/thomasteagua123/pico-park-server:latest
     container_name: pico-park-server
-    restart: always
     ports:
-      - "3000:3000"
-    environment:
-      - PORT=3000
-    # Si tu juego guardase datos o partidas, aquí agregarías volumes:
-    # - ./Game/data:/app/data
+      - "3010:3000"
+    restart: always
